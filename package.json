@@ -4,7 +4,7 @@
   "description": "Lignées — une vie, mille possibles. Simulation de vie et de générations en texte, sans dépendance.",
   "private": true,
   "scripts": {
-    "test": "node test.cjs && node test-final.cjs && node test-depth.cjs && node test-all-layers.cjs && node test-standing.cjs && node test-lineage.cjs && node ui-final-test.cjs && node ui-depth-test.cjs && node ui-layout-test.cjs",
+    "test": "node test.cjs && node test-final.cjs && node test-depth.cjs && node test-all-layers.cjs && node test-standing.cjs && node test-lineage.cjs && node test-milestones.cjs && node test-achievements.cjs && node ui-final-test.cjs && node ui-depth-test.cjs && node ui-layout-test.cjs",
     "build": "node build.cjs",
     "start": "python3 -m http.server 8765 -d dist"
   }
