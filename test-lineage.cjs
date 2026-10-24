@@ -1,0 +1,17 @@
+const assert=require('node:assert/strict');
+for(const n of ['engine','world','depth','time','checks','occupations','society','standing','lineage'])require('./dist/'+n+'.js');const L=globalThis.Life;
+function play(s){let g=0;while(s.person.alive&&g++<400){if(s.pending){const ok=s.pending.choices.map((c,k)=>[c,k]).filter(([c])=>!L.canChoose(s,c));L.choose(s,ok[Math.floor(L.rand(s)*ok.length)][1])}else{const p=s.person;if(p.age>=18&&!p.career&&!p.retired&&L.available(p)>=1){const o=L.offers(s).find(x=>p.education>=x.degree&&!p.actions[x.id]);if(o)L.action(s,'applyJob',o.id)}if(p.age>=22&&p.age<=40&&L.available(p)>=1&&!p.partner)L.action(s,'date');if(p.age>=23&&p.age<=42&&p.partner&&p.children.length<2&&L.available(p)>=1)L.action(s,'child');if(p.career&&L.available(p)>=1)L.action(s,'promotion');if(L.available(p)>=1)L.action(s,'learn','academic');L.year(s)}}}
+// Le capital s'accumule de génération en génération, même depuis un pays très pauvre.
+const G=3,caps=Array.from({length:G},()=>[]);
+for(let i=0;i<25;i++){const s=L.create('LIN-'+i,'SD');for(let g=0;g<G;g++){play(s);caps[g].push(s.person.lineage?.capital??0);const kid=s.person.children.find(c=>c.alive&&s.people[c.id]);if(!kid||g===G-1)break;assert(L.inherit(s,kid.id))}}
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;assert(caps[1].length>=8,'des descendants existent');assert(mean(caps[1])>mean(caps[0])+4,'capital de la 2e génération > 1re');assert(mean(caps[2])>mean(caps[1]),'capital de la 3e génération > 2e');
+// Un héritier d'une famille accomplie part plus haut en politique et en réseau qu'un héritier d'une famille modeste.
+function heir(rich){const s=L.create('HEIR-'+rich,'FR');s.pending=null;const parent=s.person;Object.assign(parent,{age:50,education:3,cash:rich?3e6:0,career:{sector:'politics',level:3,rank:5,years:20,jobId:'politics-9'},visibility:{creative:0,science:0,sport:rich?80:0}});parent.politics.wins=rich?[{key:'minister',year:2020},{key:'head',year:2030}]:[];parent.lineage={capital:rich?60:0,stigma:0,applied:true};
+  const kid={...JSON.parse(JSON.stringify(parent)),id:99,name:'Enfant',age:17,parents:[{id:parent.id,name:parent.name,bond:80}],children:[],partner:null,career:null,lineage:undefined,network:10,reputation:10,skills:{academic:10,technical:0,creative:0,social:0,management:0},politics:{experience:0,local:5,trust:35,profile:0,party:0,member:false,office:null,wins:[],terms:0},familyCapital:{education:0,network:0,publicName:0,security:0}};
+  s.people[99]=kid;kid.age=18;L.year(s);return s.people[99]}
+const a=heir(true),b=heir(false);assert(a.lineage.capital>b.lineage.capital+30);assert(a.politics.profile>b.politics.profile);assert(a.politics.party>b.politics.party);assert(a.network>b.network);
+// Un passé en marge pèse sur les descendants.
+const marged=L.create('STIG','FR');marged.pending=null;marged.person.outlaw.record=5;marged.person.outlaw.level=2;assert(L.lineage.stigma(marged.person)>=20);
+// Le bonus au D20 est borné et visible.
+const s=L.create('D20','FR');s.pending=null;Object.assign(s.person,{age:30,education:1});const offer={sector:'tech',level:1,load:2,title:'Dév'};const base=L.checkModel(s,'job',offer);s.person.lineage={capital:80,stigma:0,applied:true};const boosted=L.checkModel(s,'job',offer);assert(boosted.probability>base.probability);assert(boosted.modifier-base.modifier<=3);assert(boosted.bonuses.some(x=>/lignée/.test(x.label)));
+console.log(JSON.stringify({lineage:'passed',meanCapitalByGeneration:caps.map(x=>Math.round(mean(x)*10)/10),descendants:caps.map(x=>x.length)}));
