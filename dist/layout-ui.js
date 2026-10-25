@@ -90,7 +90,7 @@ const railBeforeStudy=characterRail;characterRail=function(){let html=railBefore
   const pets=(p.pets||[]).filter(x=>!x.dead);if(pets.length)extra.push(`<div class="cond-strip">${pets.map(x=>`<span class="tag">${Life.pets.SPECIES[x.sp].icon} ${esc(x.name)} · ${x.age} an${x.age>1?'s':''}</span>`).join('')}</div>`);
   if(conds.length)extra.push(`<div class="cond-strip">${conds.map(x=>`<span class="tag ${x.sev>=2?'warning':''}">${esc(x.label)}</span>`).join('')}</div>`);
   const pass=Object.entries(p.passions||{}).filter(([,v])=>v.intensity>0).slice(0,3).map(([id,v])=>`<span class="tag">${Life.passionById[id].icon} ${Math.round(v.level)}</span>`).join('');if(pass)extra.push(`<div class="cond-strip">${pass}</div>`);
-  if(p.age>=18)extra.push(`<small class="muted cur-line">${esc(Life.currency.info(state).text)}</small>`);
+  if(p.age>=18&&!Life.currency.info(state).euro)extra.push(`<small class="muted cur-line">${esc(Life.currency.info(state).text)}</small>`);
   if(!extra.length)return html;return html.replace('<div class="rail-stats">',`<div class="rail-extra">${extra.join('')}</div><div class="rail-stats">`)};
 /* Études */
 function programCard(x,p){const blocked=!x.eligible;return`<article class="program ${blocked?'blocked':''}"><div class="pr-head"><div><h4>${esc(x.name)}</h4><small>${esc(x.desc||'')}</small></div><div class="pr-chance"><b>${esc(Life.odds.pct(x.admission))}</b><small>d’admission (${esc(Life.odds.chances(x.admission))})</small></div></div>

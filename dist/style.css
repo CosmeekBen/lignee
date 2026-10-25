@@ -84,3 +84,10 @@
 .death-stats{margin-top:18px}.death-stats h3{margin:6px 0 10px}.ds-row{padding:10px 0;border-bottom:1px solid var(--line)}.ds-row:last-of-type{border-bottom:0}.ds-row p{font-size:13px;line-height:1.55}.ds-row small{display:block;margin-top:3px;color:var(--muted);font-size:11px}
 
 .src{font-style:normal;font-size:9px;letter-spacing:.4px;text-transform:uppercase;padding:2px 6px;border-radius:9px;margin-left:5px;white-space:nowrap}.src-real{background:#243428;color:#a9d49c}.src-est{background:#2c2c1c;color:#d9bd80}.src-game{background:#2a2530;color:#c8b0e0}
+
+/* « Cette année, l'essentiel est ici » : un cran plus visible, sans concurrencer la décision */
+.life-center .year-hub{margin:6px 0 26px;padding:16px 18px 8px;background:var(--panel);border:1px solid #34412f;border-radius:12px}
+.life-center .year-hub .section-head{margin-bottom:8px}.life-center .year-hub .section-head h3{font-size:15px;letter-spacing:0;text-transform:none;color:var(--text);font-weight:700}.life-center .year-hub .history-total{font-size:11px;padding:3px 10px;border:1px solid #3d4a37;border-radius:20px;color:var(--green)}
+.life-center .hub-card{padding:13px 12px}.life-center .hub-card:last-child{border-bottom:0}.life-center .hub-card h4{font-size:14px}.life-center .hub-card p{font-size:12.5px}
+.life-center .hub-card.attention{background:#26221a;border-left:3px solid var(--gold);border-radius:8px;margin:4px 0}.life-center .hub-card.attention .btn{background:var(--green);color:#16200f;border-color:var(--green);font-weight:700}
+.life-center .hub-card .btn{border-color:#4a5b43}.life-center .hub-card .btn:hover{border-color:var(--green)}
