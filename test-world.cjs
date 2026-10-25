@@ -54,4 +54,11 @@ const sw=L.struggles.find(x=>x.id==='forced-marriage');assert(['accept','refuse'
  assert(L.currency.upaToEUR(a,10000)>L.currency.upaToEUR(b,10000)*2,'un même montant en UPA vaut moins d’euros au Soudan qu’en France');
  assert.equal(L.currency.localText(a,10000),'','pas de monnaie locale à afficher en zone euro');assert(/SDG/.test(L.currency.localText(b,10000)));assert(/USD/.test(L.currency.localText(u,10000)));
  assert(/€/.test(L.currency.describe(b,5000)));for(const x of [a,b,u])assert(!/NaN|undefined/.test(L.currency.describe(x,1234567)))}
+
+// ── Les montants suivent le pays où l'on vit
+{const m=L.create('LZ1','ML');const txt='Il manque 2 000 UPA, soit 12 500 UPA/an et 3 <small>UPA</small>.';const a=L.currency.localize(m,txt);assert(/XOF/.test(a)&&/€/.test(a)&&!/UPA/.test(a),'Mali : franc CFA avec équivalent en euros : '+a);
+ m.person.country='FR';const b=L.currency.localize(m,'1 500 UPA');assert(/€$/.test(b)&&!/XOF/.test(b),'après déménagement en France : euros seulement : '+b);
+ m.person.country='US';assert(/\$ \(≈ .* €\)$/.test(L.currency.localize(m,'1 500 UPA')),'États-Unis : dollars avec équivalent');
+ L.log(m,'Vous recevez 3 000 UPA',true);assert(!/UPA/.test(m.journal.at(-1).text)&&/\$/.test(m.journal.at(-1).text),'journal écrit dans la monnaie du moment');
+ assert.equal(L.currency.localize(m,'rien à convertir'),'rien à convertir')}
 console.log(JSON.stringify({world:'passed',reachLycee:{SD:rSD,FR:rFR},fatePerLife:+mean.toFixed(1),struggles,passionCareers:L.passionCareers.length,occupations:L.occupations.length}));

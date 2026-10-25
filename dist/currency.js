@@ -33,5 +33,20 @@ function localText(s,upa,p=s.person){const c=L.country(s,p),cur=currencyOf(c.cod
 function describe(s,upa,p=s.person){const l=localText(s,upa,p);return eurText(s,upa,p)+(l?' · '+l:'')}
 /* Pour un pays donné, sans personnage : revenu moyen annuel. */
 function countryIncome(s,c){const upa=c.income,e=upa*pli(c)/R.USD[0];return{upa,eur:e,local:e*currencyOf(c.code).perEUR,cur:currencyOf(c.code)}}
-L.currency={R,map,of:currencyOf,pli,upaToEUR,toLocal,eurText,localText,describe,countryIncome,info:(s,p=s.person)=>{const c=L.country(s,p),cur=currencyOf(c.code);return{...cur,pli:pli(c),eurPerUPA:pli(c)/R.USD[0],text:cur.euro?'La monnaie de votre pays est l’euro.':`Monnaie locale : ${cur.name} (${cur.code}). 1 € ≈ ${compact(cur.perEUR)} ${cur.code}.`}}};
+
+/* Libellé court de la monnaie (symbole connu, sinon code ISO). */
+const SHORT={EUR:'€',USD:'$',GBP:'£',JPY:'¥',CNY:'¥'};
+const sig=(x,n=3)=>{if(!x)return 0;const d=Math.pow(10,Math.floor(Math.log10(Math.abs(x)))-n+1);return Math.round(x/d)*d};
+const group=x=>x.toLocaleString('fr-FR',{maximumFractionDigits:2});
+function amount(x){const a=Math.abs(x);if(a>=1e9)return(x/1e9).toLocaleString('fr-FR',{maximumFractionDigits:2})+' Md';if(a>=1e6)return(x/1e6).toLocaleString('fr-FR',{maximumFractionDigits:2})+' M';return group(a>=1000?sig(x):Math.round(x))}
+/* Montant en UPA -> « 475 100 SDG (≈ 180 €) », dans la monnaie du pays où vit la personne. */
+function format(s,upa,p=s.person){const c=L.country(s,p),cur=currencyOf(c.code);if(Math.abs(upa)<.5)return'0 '+(cur.euro?'€':SHORT[cur.code]||cur.code);const local=upaToEUR(s,upa,p)*cur.perEUR,eur=upaToEUR(s,upa,p),lab=SHORT[cur.code]||cur.code;
+  if(cur.euro)return amount(eur)+' €';return amount(local)+' '+lab+' (≈ '+amount(eur)+' €)'}
+/* Remplace dans un texte tous les « N UPA » par la monnaie locale avec l'équivalent en euros. */
+const NUM='-?\\d{1,3}(?:[\\u00a0\\u202f ]\\d{3})+(?:,\\d+)?|-?\\d+(?:,\\d+)?';
+const RE=new RegExp('('+NUM+')(?:\\s|&nbsp;|\\u00a0)*(?:<small>)?UPA(?:</small>)?','g');
+function localize(s,text,p){if(typeof text!=='string'||!text.includes('UPA')||!s?.person)return text;p=p||s.person;
+  return text.replace(RE,(m,n)=>{const v=Number(n.replace(/[\u00a0\u202f\s]/g,'').replace(',','.'));return Number.isFinite(v)?format(s,v,p):m})}
+
+L.currency={format,localize,R,map,of:currencyOf,pli,upaToEUR,toLocal,eurText,localText,describe,countryIncome,info:(s,p=s.person)=>{const c=L.country(s,p),cur=currencyOf(c.code);return{...cur,pli:pli(c),eurPerUPA:pli(c)/R.USD[0],text:cur.euro?'La monnaie de votre pays est l’euro.':`Monnaie locale : ${cur.name} (${cur.code}). 1 € ≈ ${compact(cur.perEUR)} ${cur.code}.`}}};
 })(typeof window!=='undefined'?window:globalThis);
