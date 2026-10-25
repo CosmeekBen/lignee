@@ -25,13 +25,14 @@ function stats(s,p=s.person){const c=L.country(s,p),age=Math.max(0,Math.round(p.
   if(cause){out.causeCountry=causeRisk(s,p,c.code,age,cause);out.causeFR=causeRisk(s,p,fr,age,cause);const a=out.causeCountry.per100k,b=out.causeFR.per100k;out.ratio=a&&b?a/b:null}
   return out}
 const per=(x,n=1000)=>{const v=x*n;return v>=100?Math.round(v).toLocaleString('fr-FR'):v>=10?(Math.round(v*10)/10).toLocaleString('fr-FR'):(Math.round(v*100)/100).toLocaleString('fr-FR')};
-function lines(s,p=s.person){const m=stats(s,p),who=m.age<15?'enfants nés':m.age<40?'jeunes nés':'personnes nées',place=loc(L.country(s,p));const L1=[];
-  if(m.age>=1)L1.push({label:`Sur 1 000 ${who} ${place}, ${per(m.cumCountry)} meurent avant ${m.age} an${m.age>1?'s':''}.`,note:`France : ${per(m.cumFR)} · monde : ${per(m.cumWorld)}`});
-  L1.push({label:`À ${m.age} an${m.age>1?'s':''}, le risque de mourir dans l’année est de ${per(m.riskCountry)} pour 1 000 ${place}.`,note:`France : ${per(m.riskFR)} pour 1 000 · monde : ${per(m.riskWorld)} pour 1 000`});
-  if(m.cause&&m.causeCountry?.per100k!=null){const a=m.causeCountry.per100k,b=m.causeFR.per100k;L1.push({label:`Cause : ${m.cause}. Risque annuel de mourir de cette cause à cet âge : ${per(a,1).replace(/,00$/,'')} pour 100 000 ${place}.`,note:`${b!=null?`France : ${per(b,1)} pour 100 000`:''}${m.ratio?` · ${m.ratio>=1.15?`≈ ${fr(m.ratio>=10?Math.round(m.ratio):Math.round(m.ratio*10)/10)} fois plus élevé ici`:m.ratio<=.87?`≈ ${fr(Math.round(1/m.ratio*10)/10)} fois plus faible ici`:'comparable'}`:''}`}
-    );if(m.causeCountry.share!=null)L1.push({label:`Parmi les décès à cet âge ${place}, ${Math.round(m.causeCountry.share*100)} % ont cette cause.`,note:`France : ${m.causeFR.share!=null?Math.round(m.causeFR.share*100)+' %':'—'}`})}
-  else if(m.cause)L1.push({label:`Cause : ${m.cause}. Un imprévu rare : le modèle ne l’attribue pas à un taux de mortalité fixe pour cet âge.`,note:''});
-  L1.push({label:`Chance d’avoir atteint ${m.age} an${m.age>1?'s':''}, pour une personne née ${place} : ${fr(Math.round(m.survival*1000)/10)} %.`,note:`Espérance de vie à la naissance dans le modèle : ${m.life} ans`});
-  return L1}
+function lines(s,p=s.person){const m=stats(s,p),O=L.odds,noun=m.age<15?'enfants':m.age<40?'jeunes':'personnes',born=noun==='personnes'?'nées':'nés',place=loc(L.country(s,p));const out=[];
+  if(m.age>=1)out.push({label:`${O.share(m.cumCountry)} des ${noun} ${born} ${place} meurent avant ${m.age} an${m.age>1?'s':''}.`,note:`France : ${O.share(m.cumFR)} · monde : ${O.pct(m.cumWorld)}`});
+  out.push({label:`À ${m.age} an${m.age>1?'s':''}, le risque de mourir dans l’année est de ${O.both(m.riskCountry)} ${place}.`,note:`France : ${O.both(m.riskFR)} · monde : ${O.pct(m.riskWorld)}`});
+  if(m.cause&&m.causeCountry?.per100k!=null){const a=m.causeCountry.per100k/1e5,b=m.causeFR.per100k!=null?m.causeFR.per100k/1e5:null;
+    out.push({label:`Cause : ${m.cause}. Risque annuel de mourir de cette cause à cet âge : ${O.both(a)} ${place}.`,note:`${b!=null?`France : ${O.pct(b)}`:''}${m.ratio?` · ${m.ratio>=1.15?`≈ ${String(m.ratio>=10?Math.round(m.ratio):Math.round(m.ratio*10)/10).replace('.',',')} fois plus élevé ici`:m.ratio<=.87?`≈ ${String(Math.round(1/m.ratio*10)/10).replace('.',',')} fois plus faible ici`:'comparable'}`:''}`});
+    if(m.causeCountry.share!=null)out.push({label:`Parmi les décès à cet âge ${place}, ${O.pct(m.causeCountry.share)} (${O.oneIn(m.causeCountry.share,'décès sur')}) ont cette cause.`.replace(' (1 décès sur ',' (1 décès sur ').replace(/\(\d+ chances sur/,'(≈ '+Math.round(m.causeCountry.share*10)+' décès sur 10 ; '+'$&').replace(/\(≈ (\d+) décès sur 10 ; \(/,'(≈ $1 décès sur 10)'),note:`France : ${m.causeFR.share!=null?O.pct(m.causeFR.share):'—'}`})}
+  else if(m.cause)out.push({label:`Cause : ${m.cause}. Un imprévu rare : le modèle ne l’attribue pas à un taux de mortalité fixe pour cet âge.`,note:''});
+  out.push({label:`Chance d’avoir atteint ${m.age} an${m.age>1?'s':''}, pour une personne née ${place} : ${O.both(m.survival)}.`,note:`Espérance de vie à la naissance dans le modèle : ${m.life} ans`});
+  return out}
 L.mortality={stats,lines,causeRisk,cum,risk,locative:loc};
 })(typeof window!=='undefined'?window:globalThis);

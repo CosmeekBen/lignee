@@ -82,3 +82,5 @@
 .eur{display:block;color:var(--muted);font-size:10px;margin-top:2px}.data-row .eur,.rail-money .eur{text-align:right}.cur-line{font-size:10px;line-height:1.5}
 
 .death-stats{margin-top:18px}.death-stats h3{margin:6px 0 10px}.ds-row{padding:10px 0;border-bottom:1px solid var(--line)}.ds-row:last-of-type{border-bottom:0}.ds-row p{font-size:13px;line-height:1.55}.ds-row small{display:block;margin-top:3px;color:var(--muted);font-size:11px}
+
+.src{font-style:normal;font-size:9px;letter-spacing:.4px;text-transform:uppercase;padding:2px 6px;border-radius:9px;margin-left:5px;white-space:nowrap}.src-real{background:#243428;color:#a9d49c}.src-est{background:#2c2c1c;color:#d9bd80}.src-game{background:#2a2530;color:#c8b0e0}

@@ -20,7 +20,7 @@ add('CAD','CA');add('MXN','MX');add('GTQ','GT');add('HNL','HN');add('NIO','NI');
 add('AUD','AU KI TV NR');add('NZD','NZ');add('FJD','FJ');add('PGK','PG');add('SBD','SB');add('VUV','VU');add('WST','WS');add('TOP','TO');
 /* Niveau de prix : valeur de marché, en dollars, d'un dollar de parité de pouvoir d'achat. */
 const lg=(x,a,b)=>clamp(Math.log(Math.max(1,x)/a)/Math.log(b/a),0,1);
-const pli=c=>clamp(.2+.65*Math.pow(lg(c.income,1500,60000),.9),.2,1.05);
+const pli=c=>c.nominal&&c.income?clamp(c.nominal/c.income,.15,1.5):clamp(.2+.65*Math.pow(lg(c.income,1500,60000),.9),.2,1.05);
 function currencyOf(code){const cur=map[code]||'USD',r=R[cur];return{code:cur,perEUR:r[0],name:r[1],symbol:r[2],euro:cur==='EUR'}}
 /* UPA -> euros, au taux de change du marché, dans le pays donné. */
 function upaToEUR(s,upa,p=s.person){const c=L.country(s,p);return upa*pli(c)/R.USD[0]}

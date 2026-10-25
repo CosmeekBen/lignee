@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-for(const n of ['engine','world','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life,A=L.achievements;
+for(const n of ['engine','world','facts','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life,A=L.achievements;
 assert(A.list.length>=35);assert.equal(new Set(A.list.map(t=>t.id)).size,A.list.length);for(const t of A.list)assert(t.icon&&t.name&&t.desc&&t.pts>0&&typeof t.test==='function',t.id);
 // Les succès se débloquent une fois, au bon moment, et rapportent des points.
 const s=L.create('TROPHY','FR');s.pending=null;assert.equal(A.score(s),0);assert.equal(A.level(s).name,'Graine');

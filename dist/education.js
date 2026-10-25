@@ -31,7 +31,9 @@ L.extraJobReasons=extraJobReasons;L.hasField=hasField;L.fieldNames=FIELD_NAMES;L
 
 /* ── Accès à la scolarité par pays, foyer et sexe ── */
 const poorness=c=>clamp(1-Math.log(c.income/1500)/Math.log(45000/1500),0,1);
-const cum={primary:c=>.55+.43*Math.pow(1-poorness(c),.8),lower:c=>.25+.72*Math.pow(1-poorness(c),.9),upper:c=>.10+.85*Math.pow(1-poorness(c),1.15),tertiary:c=>clamp(.04+.5*(Math.log(c.income/1500)/Math.log(45000/1500)),.04,.6)};
+const cum0={primary:c=>.55+.43*Math.pow(1-poorness(c),.8),lower:c=>.25+.72*Math.pow(1-poorness(c),.9),upper:c=>.10+.85*Math.pow(1-poorness(c),1.15),tertiary:c=>clamp(.04+.5*(Math.log(c.income/1500)/Math.log(45000/1500)),.04,.6)};
+const EDU_IDX={primary:0,lower:1,upper:2,tertiary:3};
+const cum=Object.fromEntries(Object.keys(cum0).map(k=>[k,c=>c.edu?c.edu[EDU_IDX[k]]:cum0[k](c)]));
 const STAGES=[{id:'primary',age:6,level:1,label:'l’école primaire',short:'primaire'},{id:'lower',age:11,level:2,label:'le collège',short:'collège'},{id:'upper',age:15,level:3,label:'le lycée',short:'lycée'},{id:'tertiary',age:18,level:4,label:'les études supérieures',short:'supérieur'}];
 /* Rapport filles/garçons (indicatif) : par région, quelques pays où l'accès est très restreint. */
 const parityRegion={Afrique:.92,Asie:.97,Amériques:1.06,Europe:1.03,Océanie:1};const parityCountry={AF:.2};
@@ -123,7 +125,7 @@ L.enrol=enrol;L.leaveStudy=leaveStudy;
 /* ── Passages scolaires : événements avec statistiques ── */
 const pct=n=>Math.round(n*100)+' %';
 function stageEvent(s,p,st){const o=stageOdds(s,p,st.id),c=L.country(s,p),sexLabel=p.sex==='F'?'filles':'garçons',otherLabel=p.sex==='F'?'garçons':'filles',other=sexRate(c,st.id,p.sex==='F'?'M':'F',o.country);
-  const stats=[{label:`Jeunes de ${c.name} qui atteignent ${st.label}`,pct:Math.round(o.country*100)},{label:`dont ${sexLabel}`,pct:Math.round(o.sex*100),note:`${otherLabel} : ${Math.round(other*100)} %`},...(st.id!=='primary'?[{label:`Parmi celles et ceux qui sont arrivé·es jusque-là (${sexLabel})`,pct:Math.round(o.conditionalSex*100)}]:[]),{label:'Vos chances, selon votre foyer et vos résultats',pct:Math.round(o.you*100),strong:true}];
+  const stats=[{label:`Jeunes nés ${L.mortality?L.mortality.locative(c):'en '+c.name} qui atteignent ${st.label}`,pct:Math.round(o.country*100)},{label:`dont ${sexLabel}`,pct:Math.round(o.sex*100),note:`${otherLabel} : ${Math.round(other*100)} %`},...(st.id!=='primary'?[{label:`Parmi celles et ceux qui sont arrivé·es jusque-là (${sexLabel})`,pct:Math.round(o.conditionalSex*100)}]:[]),{label:'Vos chances, selon votre foyer et vos résultats',pct:Math.round(o.you*100),strong:true}];
   const poor=(p.wealthTier??.5)<.35||c.income<4500,id='edu-'+st.id;
   const text={lower:poor?`Dans votre région, peu d’enfants vont au collège : il est loin, parfois payant, et chacun est attendu à la maison. Vous avez le droit de vouloir autre chose, ou de ne pas le vouloir.`:`Une nouvelle étape scolaire s’ouvre : plus de matières, plus d’autonomie. Mais personne ne vous oblige à vouloir y aller aussi loin que possible.`,
     upper:poor?`Le lycée est une exception dans votre entourage. Il demande de la persévérance, souvent de l’argent, parfois de partir loin. Beaucoup d’adultes autour de vous n’y sont jamais allés.`:`Le lycée prépare à l’orientation. Il demande des efforts et du temps, mais ouvre la plupart des études supérieures.`,

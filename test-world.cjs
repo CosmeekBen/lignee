@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-for(const n of ['engine','world','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
+for(const n of ['engine','world','facts','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
 const play=(s,until=999,pick)=>{let g=0;while(s.person.alive&&s.person.age<until&&g++<500){if(s.pending){const e=s.pending;const ok=e.choices.findIndex(c=>!L.canChoose(s,c));L.choose(s,pick?pick(e,ok):(ok<0?0:ok))}else L.year(s)}return s};
 // ── Noms cohérents avec la culture
 const sur=code=>new Set(Array.from({length:40},(_,i)=>L.create('N'+code+i,code).person.surname));
@@ -9,10 +9,10 @@ for(let i=0;i<30;i++){const s=L.create('P'+i,'RU'),p=s.person,mother=p.parents.f
 const et=L.create('ET1','ET'),f=et.person.parents.find(x=>x.role==='père');assert.equal(et.person.surname,f.name,'patronyme éthiopien');
 // ── Scolarité : statistiques par pays et par sexe
 const stats=(c,sx)=>{const s=L.create('S'+c+sx,c);s.person.sex=sx;return L.schoolStats(s)};
-const sd=stats('SD','F'),fr=stats('FR','F'),af=stats('AF','F'),afM=stats('AF','M');assert(sd[2].country<25&&fr[2].country>75,'lycée rare au Soudan, courant en France');assert(af[2].sex<afM[2].sex*.5,'accès très inégal en Afghanistan dans le modèle');assert(sd[0].country>sd[1].country&&sd[1].country>sd[2].country&&sd[2].country>sd[3].country,'cascade décroissante');
+const sd=stats('SD','F'),fr=stats('FR','F'),af=stats('AF','F'),afM=stats('AF','M');assert(sd[2].country<40&&sd[2].country>15&&fr[2].country>75,'lycée minoritaire au Soudan, courant en France');assert(af[2].sex<afM[2].sex*.5,'accès très inégal en Afghanistan dans le modèle');assert(sd[0].country>sd[1].country&&sd[1].country>sd[2].country&&sd[2].country>sd[3].country,'cascade décroissante');
 // Atteindre le lycée est rare dans les pays pauvres, courant dans les riches.
 const reach=(code,n)=>{let c=0;for(let i=0;i<n;i++){const s=L.create('RC'+code+i,code);play(s,19,(e,ok)=>/^edu-(lower|upper|tertiary)$/.test(e.id)?1:(ok<0?0:ok));if(L.schoolLevel(s.person)>=3)c++}return c/n};
-const rSD=reach('SD',150),rFR=reach('FR',60);assert(rSD>.08&&rSD<.45,'Soudan : '+rSD);assert(rFR>.8,'France : '+rFR);
+const rSD=reach('SD',150),rFR=reach('FR',60);assert(rSD>.12&&rSD<.5,'Soudan : '+rSD);assert(rFR>.8,'France : '+rFR);
 // Le choix de ne pas continuer est réel.
 const stop=L.create('STOP','FR');play(stop,12,(e,ok)=>e.id==='edu-lower'?2:(ok<0?0:ok));assert(L.schoolLevel(stop.person)<2||stop.person.school.history.some(h=>h.stage==='lower'&&!h.ok),'arrêter est possible');
 // ── Cohérence des métiers
@@ -77,4 +77,11 @@ const sw=L.struggles.find(x=>x.id==='forced-marriage');assert(['accept','refuse'
  assert(/au Soudan/.test(L.mortality.lines(mk('SD',8,'une pneumonie'))[0].label)&&/aux États-Unis/.test(L.mortality.lines(mk('US',40,'un cancer'))[0].label),'accord du pays');
  // mortalité des enfants : plus élevée dans les pays pauvres, comparable à la réalité en ordre de grandeur
  assert(L.mortality.cum(L.create('x','NE'),'NE',5)*1000>60&&L.mortality.cum(L.create('x','FR'),'FR',5)*1000<20,'mortalité avant 5 ans plausible')}
+
+// ── Calibrage : le jeu reproduit l'espérance de vie et la mortalité des enfants de chaque pays
+{const t=L.create('CAL','FR');for(const c of L.countries){assert(Number.isFinite(c.life)&&c.life>=45&&c.life<=90,'espérance de vie '+c.code);assert(c.income>=500&&c.nominal>=100&&c.u5>=1&&c.u5<=130,'données '+c.code);const le=L.modelLifeExpectancy(c);assert(Math.abs(le-(c.life+Math.min(6,Math.max(0,.16*(c.life-50)))))<.6,'espérance de vie du modèle '+c.code+' : '+le+' vs '+c.life)
+  let S=1;for(let a=0;a<5;a++)S*=1-L.deathRate(t,{country:c.code,age:a,health:85});assert(Math.abs((1-S)*1000-c.u5)<c.u5*.08+.4,'mortalité avant 5 ans '+c.code+' : '+((1-S)*1000).toFixed(1)+' vs '+c.u5)}
+ const ages={};for(const code of ['FR','SD','IN']){let sum=0,n=140;for(let i=0;i<n;i++){const s=L.create('LE'+code+i,code);play(s);sum+=s.person.age}ages[code]=sum/n;const life=L.countries.find(x=>x.code===code).life;assert(Math.abs(sum/n-life)<4,code+' : âge moyen simulé '+(sum/n).toFixed(1)+' vs espérance de vie '+life)}
+ assert(L.countries.find(x=>x.code==='NG').life<60&&L.countries.find(x=>x.code==='JP').life>82,'ordres de grandeur réels');
+ assert(L.odds.both(.5)==='50 % (1 chance sur 2)'&&L.odds.both(.25)==='25 % (1 chance sur 4)'&&/^10 % \(1 chance sur 10\)$/.test(L.odds.both(.1))&&/3 chances sur 4/.test(L.odds.both(.75))&&/1 chance sur 2,7 millions/.test(L.odds.both(3.7e-7)),'pourcentages et chances')}
 console.log(JSON.stringify({world:'passed',reachLycee:{SD:rSD,FR:rFR},fatePerLife:+mean.toFixed(1),struggles,passionCareers:L.passionCareers.length,occupations:L.occupations.length}));

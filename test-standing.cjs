@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-for(const n of ['engine','world','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
+for(const n of ['engine','world','facts','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
 const mk=(code,fn)=>{const s=L.create('STAND-'+code,code);s.pending=null;Object.assign(s.person,{age:35,education:1,health:80,happiness:60});fn&&fn(s);return L.standing(s)};
 const get=(st,id)=>st.rows.find(r=>r.id===id);
 // Un revenu plus élevé place plus haut, dans chaque cadre.

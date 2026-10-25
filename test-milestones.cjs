@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-for(const n of ['engine','world','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
+for(const n of ['engine','world','facts','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
 const N=60,perAge={},seen=new Set();let big=0,lost=0;
 for(let i=0;i<N;i++){const s=L.create('MSN-'+i,['FR','SD','US','IN'][i%4]);let g=0;const got=new Set();
   while(s.person.alive&&g++<300){if(s.pending){const e=s.pending;assert(e.choices.length>=1);if(s.person.age<=17&&e.id!=='birth')perAge[s.person.age]=(perAge[s.person.age]||0)+1;if(e.announce){assert(e.big&&e.sub,'annonce complète');seen.add(e.id)}got.add(e.id);const ok=e.choices.findIndex(c=>!L.canChoose(s,c));assert(ok>=0,'aucune impasse '+e.id);assert(L.choose(s,ok))}else L.year(s)}
