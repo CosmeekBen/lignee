@@ -1,6 +1,6 @@
 /* Disposition de « Ma vie » : le personnage à gauche, les focus en haut au centre,
    les événements au centre. Ajoute aussi la vue « Repères » (comparaisons en %). */
-const BUILD_LABEL='2.10';
+const BUILD_LABEL='2.11';
 tabs.splice(1,0,['standing','%','Repères']);navUnlock.standing=6;
 const railBar=(label,v,good=true)=>`<div class="rail-stat"><div><span>${label}</span><b>${Math.round(v)}</b></div><div class="bar"><i style="width:${Math.max(0,Math.min(100,v))}%;background:${(good?v:100-v)<30?'var(--red)':'var(--green)'}"></i></div></div>`;
 const pctLabel=r=>r.share?r.world.toLocaleString('fr-FR')+' %':Life.describePercentile(r.world);
@@ -139,5 +139,5 @@ const sourcesBeforeFacts=sources;sources=function(){sourcesBeforeFacts();const d
 
 /* Frise tout en haut, avec une barre qui se remplit au fil de l'année */
 const MONTHS_SHORT=['J','F','M','A','M','J','J','A','S','O','N','D'];
-const hudBase=timelineHUD;timelineHUD=function(){let html=hudBase();const f=Math.min(1,state?.clock?.fraction||0);const bar=`<div class="year-progress" aria-label="Avancement de l’année"><div class="yp-track">${MONTHS_SHORT.map((m,i)=>`<span class="yp-seg ${i<Math.floor(f*12)?'past':''}"></span>`).join('')}<i id="year-fill" style="width:${(f*100).toFixed(1)}%"></i></div><div class="yp-labels" id="yp-labels">${MONTHS_SHORT.map((m,i)=>`<span class="${i===Math.min(11,Math.floor(f*12))?'on':''}">${m}</span>`).join('')}</div></div>`;return html.replace('<div class="clock-controls">',bar+'<div class="clock-controls">')};
-const clockUpdateBase=updateClockUI;updateClockUI=function(){clockUpdateBase();if(!state)return;const f=Math.min(1,state.clock?.fraction||0),fill=document.getElementById('year-fill');if(fill)fill.style.width=(f*100).toFixed(1)+'%';const labels=document.getElementById('yp-labels');if(labels){const m=Math.min(11,Math.floor(f*12));[...labels.children].forEach((n,i)=>n.classList.toggle('on',i===m))}document.querySelectorAll?.('.yp-seg').forEach?.((n,i)=>n.classList.toggle('past',i<Math.floor(f*12)))};
+const hudBase=timelineHUD;timelineHUD=function(){let html=hudBase();const f=Math.min(1,state?.clock?.fraction||0);const bar=`<div class="year-progress" aria-label="Avancement de l’année"><div class="yp-track">${MONTHS_SHORT.map((m,i)=>`<span class="yp-seg ${i<Math.floor(f*12)?'past':i===Math.min(11,Math.floor(f*12))?'now':''}"></span>`).join('')}</div><div class="yp-labels" id="yp-labels">${MONTHS_SHORT.map((m,i)=>`<span class="${i===Math.min(11,Math.floor(f*12))?'on':''}">${m}</span>`).join('')}</div></div>`;return html.replace('<div class="clock-controls">',bar+'<div class="clock-controls">')};
+const clockUpdateBase=updateClockUI;updateClockUI=function(){clockUpdateBase();if(!state)return;const f=Math.min(1,state.clock?.fraction||0);const labels=document.getElementById('yp-labels');if(labels){const m=Math.min(11,Math.floor(f*12));[...labels.children].forEach((n,i)=>n.classList.toggle('on',i===m))}document.querySelectorAll?.('.yp-seg').forEach?.((n,i)=>{const m=Math.min(11,Math.floor(f*12));n.classList.toggle('past',i<Math.floor(f*12));n.classList.toggle('now',i===m&&f<1)})};

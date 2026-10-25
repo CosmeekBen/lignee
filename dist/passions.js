@@ -83,7 +83,7 @@ function injuryEvent(s,p){const entries=Object.entries(p.passions||{}).filter(([
   return{id:'passion-injury',title:'Une blessure',text:`Une mauvaise réception, un geste de trop pendant ${d.name.toLowerCase()}. Ça fait mal, et ça ne passe pas en un jour.`,category:'Passion',required:true,choices:[ch('Me soigner et reprendre doucement','Santé −5 · pratique en pause une saison',{health:-5,passion:{pause:id}}),ch('Serrer les dents','Risque de séquelles · santé −8',{health:-8,stress:4,passion:{risk:id}}),ch('Arrêter pour de bon','Épanouissement −6',{happy:-6,passion:{drop:id}})]}}
 function plan(s){const p=s.person;if(!p.alive||s.pending||p.age<5||L.coreDue?.(p))return;s.queue??=[];if(s.queue.some(e=>(e.id||'').startsWith('passion')))return;const age=p.age+1;ensurePassions(p);
   const n=Object.keys(p.passions).length,seen=p.events.filter(x=>x==='passion-discover').length;
-  if(age>=7&&age<=16&&n<2&&seen<2&&!p.events.slice(-6).includes('passion-discover')&&hash(s.seed,p.id,'pdisc',age)<.35){const e=discoverEvent(s,p);if(e)s.queue.push(e);return}
+  if(age>=7&&age<=16&&(n===0?seen<2:seen<1)&&!p.events.slice(-6).includes('passion-discover')&&hash(s.seed,p.id,'pdisc',age)<.35){const e=discoverEvent(s,p);if(e)s.queue.push(e);return}
   if(age>=18&&age<=50&&n<1&&seen<3&&hash(s.seed,p.id,'pdisc',age)<.05){const e=discoverEvent(s,p);if(e)s.queue.push(e);return}
   if(hash(s.seed,p.id,'pcontest',age)<.12&&!p.events.slice(-5).some(x=>x.startsWith('passion-contest'))){const e=contestEvent(s,p);if(e)s.queue.push(e);return}
   if(hash(s.seed,p.id,'pinj',age)<.045&&!p.events.slice(-6).includes('passion-injury')){const e=injuryEvent(s,p);if(e)s.queue.push(e)}}

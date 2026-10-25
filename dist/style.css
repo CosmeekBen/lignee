@@ -117,3 +117,5 @@
 .life-center>.grand-moment{padding:16px 20px 14px}.life-center>.grand-moment h2{font-size:23px}.life-center>.grand-moment .grand-badge{margin-bottom:6px;padding:3px 10px;font-size:10px}
 .life-center>.event .event-stats{margin:2px 0 12px;padding:10px 12px}.life-center>.event .ev-stat{margin-top:7px}
 @media(max-width:700px){.life-center>.event{padding:14px 14px 12px}.life-center>.event h2{font-size:19px}}
+
+.yp-track{height:9px}.yp-track i{display:none}.yp-seg{transition:none}.yp-seg.past{background:var(--green)}.yp-seg.now{background:#6d8a5c}.yp-labels .on{font-weight:400;color:var(--green)}.yp-labels span{white-space:nowrap}
