@@ -86,10 +86,11 @@ const railBeforeStudy=characterRail;characterRail=function(){let html=railBefore
   const extra=[];if(p.age>=6)extra.push(`<div class="data-row"><span>Scolarité</span><b>${esc(lvl)}</b></div>`);if(p.study){const pr=Life.programById[p.study.program];extra.push(`<div class="data-row"><span>En formation</span><b>${esc(pr.name)} · ${p.study.year}/${p.study.years}</b></div>`)}
   if(conds.length)extra.push(`<div class="cond-strip">${conds.map(x=>`<span class="tag ${x.sev>=2?'warning':''}">${esc(x.label)}</span>`).join('')}</div>`);
   const pass=Object.entries(p.passions||{}).filter(([,v])=>v.intensity>0).slice(0,3).map(([id,v])=>`<span class="tag">${Life.passionById[id].icon} ${Math.round(v.level)}</span>`).join('');if(pass)extra.push(`<div class="cond-strip">${pass}</div>`);
+  if(p.age>=18)extra.push(`<small class="muted cur-line">${esc(Life.currency.info(state).text)}</small>`);
   if(!extra.length)return html;return html.replace('<div class="rail-stats">',`<div class="rail-extra">${extra.join('')}</div><div class="rail-stats">`)};
 /* Études */
 function programCard(x,p){const blocked=!x.eligible;return`<article class="program ${blocked?'blocked':''}"><div class="pr-head"><div><h4>${esc(x.name)}</h4><small>${esc(x.desc||'')}</small></div><div class="pr-chance"><b>${Math.round(x.admission*100)} %</b><small>chances d’admission</small></div></div>
-<div class="pr-meta"><span>⏱ ${x.years} an${x.years>1?'s':''}</span><span>${x.free?'🆓 gratuit ou rémunéré':'💶 ≈ '+plain(x.cost)+' UPA/an'}</span>${x.fieldNames?`<span>📚 ${esc(x.fieldNames)}</span>`:''}</div>
+<div class="pr-meta"><span>⏱ ${x.years} an${x.years>1?'s':''}</span><span>${x.free?'🆓 gratuit ou rémunéré':'💶 ≈ '+plain(x.cost)+' UPA/an <small>('+Life.currency.eurText(state,x.cost)+')</small>'}</span>${x.fieldNames?`<span>📚 ${esc(x.fieldNames)}</span>`:''}</div>
 ${x.unlocks.length?`<div class="pr-unlocks"><small>Mène à :</small> ${x.unlocks.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>`:''}
 ${blocked?`<div class="pr-reasons">${x.reasons.slice(0,2).map(r=>`<small class="negative">${esc(r)}</small>`).join('')}</div>`:`<div class="pr-actions"><div class="effort">${[3,2,1].map(n=>`<label><input type="radio" name="eff-${x.id}" value="${n}" ${n===2?'checked':''}> ${Life.efforts[n].label} <small>(${Life.efforts[n].slots} créneau${n>1?'x':''})</small></label>`).join('')}</div><button class="btn primary" onclick="doEnrol('${x.id}')">S’inscrire</button></div>`}</article>`}
 function doEnrol(id){const r=document.querySelector(`input[name="eff-${id}"]:checked`),res=Life.enrol(state,id,Number(r?.value||2));save();render();toast(res.ok?res.message:res.error)}
@@ -119,3 +120,6 @@ const lifeBeforeStudy=lifeView;lifeView=function(){if(page==='study')return stud
 
 /* Fin de vie : la cause, quand elle vient d'un imprévu */
 const endingBase=ending;ending=function(){let html=endingBase();const c=state.person.cause;if(c)html=html.replace('<h2 style="margin-top:13px">',`<div class="eyebrow" style="margin-top:6px">Cause : ${esc(c)}</div><h2 style="margin-top:8px">`);return html};
+
+/* Explication des UPA et des euros */
+const sourcesBeforeCur=sources;sources=function(){sourcesBeforeCur();const d=$('#modal');d.innerHTML+='<p><b>UPA et euros :</b> les montants du jeu sont en UPA (unités de parité de pouvoir d’achat : ce qu’un dollar international achète). À côté, vous voyez la valeur en euros au taux de change du marché, et la monnaie locale. Un même montant en UPA vaut beaucoup moins d’euros dans un pays à bas prix : on y vit mieux avec peu, mais on y achète très peu à l’étranger. Taux et niveaux de prix : ordres de grandeur arrondis.</p>'};

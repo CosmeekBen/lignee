@@ -2,7 +2,7 @@ const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>
 let state=null,page='life',filter='all',toastTimer;const KEY='lignees-save-v1';
 try{const saved=JSON.parse(localStorage.getItem(KEY));if(valid(saved)){if(saved.version===1&&!localStorage.getItem(KEY+'-avant-v2'))localStorage.setItem(KEY+'-avant-v2',JSON.stringify(saved));state=Life.ensure(saved)}}catch(e){}
 function valid(s){return s&&[1,2].includes(s.version)&&typeof s.seed==='string'&&Number.isFinite(s.rng)&&Number.isFinite(s.year)&&s.person&&Number.isFinite(s.person.age)&&Array.isArray(s.person.children)&&Array.isArray(s.ancestors)&&Array.isArray(s.journal)}
-const money=n=>Math.round(n).toLocaleString('fr-FR')+' <small>UPA</small>';
+const money=n=>Math.round(n).toLocaleString('fr-FR')+' <small>UPA</small>'+(typeof Life!=='undefined'&&Life.currency&&typeof state!=='undefined'&&state&&Math.abs(n)>=1?` <small class="eur">${Life.currency.describe(state,n)}</small>`:'');
 const plain=n=>Math.round(n).toLocaleString('fr-FR');
 const icon='<svg viewBox="0 0 30 38" fill="none"><path d="M15 35V5M15 19L4 9M15 26L26 15M4 9V3M26 15V7M15 5l6-4M15 5L9 1" stroke-width="1.7"/><circle cx="15" cy="35" r="2" fill="#c5df9c" stroke="none"/></svg>';
 const tabs=[['life','◷','Ma vie'],['actions','✧','Possibilités'],['career','↗','Carrière'],['projects','◈','Projets'],['money','↗','Patrimoine'],['people','♧','Relations'],['family','⑂','Ma lignée'],['journal','≡','Journal']];

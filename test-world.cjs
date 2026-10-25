@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-for(const n of ['engine','world','depth','time','checks','occupations','society','standing','lineage','names','education','fate','passions','life-choices','milestones','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
+for(const n of ['engine','world','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','passions','life-choices','milestones','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
 const play=(s,until=999,pick)=>{let g=0;while(s.person.alive&&s.person.age<until&&g++<500){if(s.pending){const e=s.pending;const ok=e.choices.findIndex(c=>!L.canChoose(s,c));L.choose(s,pick?pick(e,ok):(ok<0?0:ok))}else L.year(s)}return s};
 // ── Noms cohérents avec la culture
 const sur=code=>new Set(Array.from({length:40},(_,i)=>L.create('N'+code+i,code).person.surname));
@@ -48,4 +48,10 @@ const sw=L.struggles.find(x=>x.id==='forced-marriage');assert(['accept','refuse'
 // ── Passions
 {const s=L.create('PS','FR');s.pending=null;s.person.age=12;assert(L.startPassion(s,'boxing',2).ok);for(let i=0;i<8;i++){L.year(s);while(s.pending)L.choose(s,0)}const lvl=s.person.passions.boxing.level;assert(lvl>25,'la boxe progresse : '+lvl);assert(L.available(s.person)<L.capacity(s.person),'la pratique occupe du temps')}
 {const s=L.create('PS2','FR');s.pending=null;s.person.age=12;assert.equal(L.startPassion(s,'golf',1).ok,false,'le golf n’est pas accessible à tous')}
+
+// ── Monnaies et équivalents en euros
+{for(const c of L.countries)assert(L.currency.map[c.code],'monnaie manquante : '+c.code);const a=L.create('CUR1','FR'),b=L.create('CUR2','SD'),u=L.create('CUR3','US');
+ assert(L.currency.upaToEUR(a,10000)>L.currency.upaToEUR(b,10000)*2,'un même montant en UPA vaut moins d’euros au Soudan qu’en France');
+ assert.equal(L.currency.localText(a,10000),'','pas de monnaie locale à afficher en zone euro');assert(/SDG/.test(L.currency.localText(b,10000)));assert(/USD/.test(L.currency.localText(u,10000)));
+ assert(/€/.test(L.currency.describe(b,5000)));for(const x of [a,b,u])assert(!/NaN|undefined/.test(L.currency.describe(x,1234567)))}
 console.log(JSON.stringify({world:'passed',reachLycee:{SD:rSD,FR:rFR},fatePerLife:+mean.toFixed(1),struggles,passionCareers:L.passionCareers.length,occupations:L.occupations.length}));

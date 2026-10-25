@@ -31,7 +31,7 @@ function normalPct(x,mean,sd){return phi((x-mean)/sd)}
 function standing(s,p=s.person){const c=L.country(s,p),k=L.reference(s,p)/c.income,age=p.age,rows=[];
   const percent=v=>Math.round(clamp(v,0,1)*1000)/10;
   const row=(id,label,display,world,country,byAge,job,note)=>rows.push({id,label,display,world:percent(world),country:percent(country),age:percent(byAge),job:job==null?null:percent(job),note});
-  const adult=age>=18,fmt=n=>Math.round(n).toLocaleString('fr-FR')+' UPA';
+  const adult=age>=18,fmt=n=>Math.round(n).toLocaleString('fr-FR')+' UPA'+(L.currency?' ('+L.currency.eurText(s,n,p)+')':'');
   const j=p.career&&L.jobById?L.jobById(p.career.jobId):null,skillKey=p.career&&L.sectors[p.career.sector]?.skill;
   if(adult){
     const pay=L.income(s,p),peerMedian=c.income*k*(j?j.income:1)*.9;
