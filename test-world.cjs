@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-for(const n of ['engine','world','facts','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
+for(const n of ['engine','world','facts','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','outcomes','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
 const play=(s,until=999,pick)=>{let g=0;while(s.person.alive&&s.person.age<until&&g++<500){if(s.pending){const e=s.pending;const ok=e.choices.findIndex(c=>!L.canChoose(s,c));L.choose(s,pick?pick(e,ok):(ok<0?0:ok))}else L.year(s)}return s};
 // ── Noms cohérents avec la culture
 const sur=code=>new Set(Array.from({length:40},(_,i)=>L.create('N'+code+i,code).person.surname));
@@ -85,3 +85,7 @@ const sw=L.struggles.find(x=>x.id==='forced-marriage');assert(['accept','refuse'
  assert(L.countries.find(x=>x.code==='NG').life<60&&L.countries.find(x=>x.code==='JP').life>82,'ordres de grandeur réels');
  assert(L.odds.both(.5)==='50 % (1 chance sur 2)'&&L.odds.both(.25)==='25 % (1 chance sur 4)'&&/^10 % \(1 chance sur 10\)$/.test(L.odds.both(.1))&&/3 chances sur 4/.test(L.odds.both(.75))&&/1 chance sur 2,7 millions/.test(L.odds.both(3.7e-7)),'pourcentages et chances')}
 console.log(JSON.stringify({world:'passed',reachLycee:{SD:rSD,FR:rFR},fatePerLife:+mean.toFixed(1),struggles,passionCareers:L.passionCareers.length,occupations:L.occupations.length}));
+{const L=globalThis.Life;let ok=0,none=0;for(let n=0;n<40;n++){const s=L.create({seed:'out'+n,country:'IN'});for(let y=0;y<13;y++)if(s.person.alive){L.year(s);if(s.pending)L.choose(s,0)}
+if(!s.person.alive)continue;s.pending={id:'teen-needhands',title:'La famille a besoin de bras',text:'x',choices:[{label:'Aider',fx:{}},{label:'Plaider pour rester à l’école',fx:{}},{label:'Chercher une aide',fx:{}}]};L.choose(s,1);
+if(s.pending?.id==='out-teen-needhands'&&/parents|aide|école/.test(s.pending.text)&&s.journal.at(-1).text.length>10){ok++;L.choose(s,0)}else none++}
+if(!ok||none)throw new Error('outcomes: ok '+ok+' none '+none);console.log('outcomes ok',ok);}

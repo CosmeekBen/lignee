@@ -1,6 +1,6 @@
 /* Disposition de « Ma vie » : le personnage à gauche, les focus en haut au centre,
    les événements au centre. Ajoute aussi la vue « Repères » (comparaisons en %). */
-const BUILD_LABEL='2.9';
+const BUILD_LABEL='2.10';
 tabs.splice(1,0,['standing','%','Repères']);navUnlock.standing=6;
 const railBar=(label,v,good=true)=>`<div class="rail-stat"><div><span>${label}</span><b>${Math.round(v)}</b></div><div class="bar"><i style="width:${Math.max(0,Math.min(100,v))}%;background:${(good?v:100-v)<30?'var(--red)':'var(--green)'}"></i></div></div>`;
 const pctLabel=r=>r.share?r.world.toLocaleString('fr-FR')+' %':Life.describePercentile(r.world);
