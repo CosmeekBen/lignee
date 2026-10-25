@@ -26,7 +26,7 @@ npm run build    # HTML autonome dans build/lignees.html
 - **Moins de répétitions** : plafonds par décision et par vie, délais minimaux.
 - **Suites des choix** (`dist/threads.js`) : un animal recueilli (espèce, couleur, nom) grandit, tombe malade, meurt ; un premier amour dure ou s'arrête ; un·e ami·e de la cour, un échange à l'étranger, une équipe de quartier, un·e enseignant·e ou un petit boulot d'été ont des suites quelques années plus tard. Chaque choix écrit une phrase précise dans le journal.
 - **Débuts variés** (`dist/variants.js`) : 24 naissances, 4 premières sorties, 7 rentrées, 5 éveils de passion et 4 adolescences différentes, selon le pays, le foyer et le milieu.
-- **Causes de décès** : chaque mort a une cause plausible (âge, pays, soins, santé).
+- **Causes de décès et la mort en chiffres** (`dist/mortality.js`) : chaque mort a une cause plausible (âge, pays, soins, santé), et l'écran de fin affiche combien de personnes nées dans ton pays meurent avant ton âge (comparé à la France et au monde), le risque de mourir de cette cause et ce que changerait l'accès aux soins d'un pays riche. La mortalité des enfants est réaliste : bien plus élevée dans les pays pauvres.
 - Écran « Ma vie » : le personnage à gauche, les focus en haut au centre, les événements au centre (`dist/layout-ui.js`).
 
 ## Architecture

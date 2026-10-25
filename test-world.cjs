@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-for(const n of ['engine','world','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','passions','life-choices','milestones','threads','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
+for(const n of ['engine','world','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
 const play=(s,until=999,pick)=>{let g=0;while(s.person.alive&&s.person.age<until&&g++<500){if(s.pending){const e=s.pending;const ok=e.choices.findIndex(c=>!L.canChoose(s,c));L.choose(s,pick?pick(e,ok):(ok<0?0:ok))}else L.year(s)}return s};
 // ── Noms cohérents avec la culture
 const sur=code=>new Set(Array.from({length:40},(_,i)=>L.create('N'+code+i,code).person.surname));
@@ -68,4 +68,13 @@ const sw=L.struggles.find(x=>x.id==='forced-marriage');assert(['accept','refuse'
 {const causes=new Set();let noCause=0,dead=0;for(let i=0;i<120;i++){const s=L.create('DC'+i,['SD','FR','UA','NG'][i%4]);play(s);if(!s.person.alive){dead++;if(!s.person.cause)noCause++;else causes.add(s.person.cause)}}assert(dead>=100&&noCause===0,'chaque décès a une cause : '+noCause+'/'+dead);assert(causes.size>=8,'causes variées : '+causes.size);
  const kid=L.create('KID8','SD');kid.person.age=8;assert(typeof L.causeOfDeath(kid,kid.person)==='string');const j=L.create('KID9','FR');j.person.age=92;assert.notEqual(L.causeOfDeath(j,j.person),L.causeOfDeath(kid,kid.person)+'x')}
 {const sch=new Set(),bir=new Set(),tal=new Set();for(let i=0;i<120;i++){const s=L.create('VAR'+i,['FR','SD','IN','US','BR'][i%5]);bir.add(s.pending.text.slice(0,40));let g=0;while(s.person.alive&&s.person.age<19&&g++<200){if(s.pending){const e=s.pending;if(e.id==='school')sch.add(e.title);if(e.id==='talent')tal.add(e.title);const ok=e.choices.findIndex(c=>!L.canChoose(s,c));L.choose(s,ok<0?0:ok)}else L.year(s)}}assert(bir.size>=8&&sch.size>=5&&tal.size>=4,'débuts variés : naissances '+bir.size+', écoles '+sch.size+', passions '+tal.size)}
+
+// ── La mort en chiffres
+{const mk=(code,age,cause)=>{const t=L.create('MS'+code+age,code);t.person.age=age;t.person.cause=cause;t.person.alive=false;return t};
+ const sd=L.mortality.stats(mk('SD',8,'une pneumonie'),mk('SD',8,'une pneumonie').person),fr=L.mortality.stats(mk('FR',8,'une pneumonie'),mk('FR',8,'une pneumonie').person);
+ assert(sd.cumCountry>fr.cumCountry*5,'bien plus d’enfants meurent avant 8 ans au Soudan qu’en France');assert(sd.riskCountry>fr.riskCountry*3);assert(sd.causeCountry.per100k>sd.causeFR.per100k*2,'la pneumonie tue davantage à soins moindres');assert(sd.ratio>2);
+ for(const [code,age,cause] of [['SD',2,'le paludisme'],['FR',58,'infarctus'],['IN',30,'un accident de la route'],['US',90,'les suites du grand âge'],['BR',1,'une infection néonatale'],['JP',70,'un cancer']]){const t=mk(code,age,cause);const lines=L.mortality.lines(t,t.person);assert(lines.length>=3);for(const l of lines)assert(!/NaN|undefined|Infinity/.test(l.label+l.note),code+' '+l.label)}
+ assert(/au Soudan/.test(L.mortality.lines(mk('SD',8,'une pneumonie'))[0].label)&&/aux États-Unis/.test(L.mortality.lines(mk('US',40,'un cancer'))[0].label),'accord du pays');
+ // mortalité des enfants : plus élevée dans les pays pauvres, comparable à la réalité en ordre de grandeur
+ assert(L.mortality.cum(L.create('x','NE'),'NE',5)*1000>60&&L.mortality.cum(L.create('x','FR'),'FR',5)*1000<20,'mortalité avant 5 ans plausible')}
 console.log(JSON.stringify({world:'passed',reachLycee:{SD:rSD,FR:rFR},fatePerLife:+mean.toFixed(1),struggles,passionCareers:L.passionCareers.length,occupations:L.occupations.length}));

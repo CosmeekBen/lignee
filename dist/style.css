@@ -80,3 +80,5 @@
 @media(max-width:900px){.study-top{grid-template-columns:1fr}.program-grid,.passion-grid{grid-template-columns:1fr}}
 
 .eur{display:block;color:var(--muted);font-size:10px;margin-top:2px}.data-row .eur,.rail-money .eur{text-align:right}.cur-line{font-size:10px;line-height:1.5}
+
+.death-stats{margin-top:18px}.death-stats h3{margin:6px 0 10px}.ds-row{padding:10px 0;border-bottom:1px solid var(--line)}.ds-row:last-of-type{border-bottom:0}.ds-row p{font-size:13px;line-height:1.55}.ds-row small{display:block;margin-top:3px;color:var(--muted);font-size:11px}
