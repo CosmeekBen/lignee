@@ -44,8 +44,8 @@ function format(s,upa,p=s.person){const c=L.country(s,p),cur=currencyOf(c.code);
   if(cur.euro)return amount(eur)+' €';return amount(local)+' '+lab+' (≈ '+amount(eur)+' €)'}
 /* Remplace dans un texte tous les « N UPA » par la monnaie locale avec l'équivalent en euros. */
 const NUM='-?\\d{1,3}(?:[\\u00a0\\u202f ]\\d{3})+(?:,\\d+)?|-?\\d+(?:,\\d+)?';
-const RE=new RegExp('('+NUM+')(?:\\s|&nbsp;|\\u00a0)*(?:<small>)?UPA(?:</small>)?','g');
-function localize(s,text,p){if(typeof text!=='string'||!text.includes('UPA')||!s?.person)return text;p=p||s.person;
+const RE=new RegExp('('+NUM+')(?:\\s|&nbsp;|\\u00a0)*(?:<small>)?(?:UPA|unités de pouvoir d’achat|unités de parité de pouvoir d’achat)(?:</small>)?','g');
+function localize(s,text,p){if(typeof text!=='string'||!/UPA|pouvoir d’achat/.test(text)||!s?.person)return text;p=p||s.person;
   return text.replace(RE,(m,n)=>{const v=Number(n.replace(/[\u00a0\u202f\s]/g,'').replace(',','.'));return Number.isFinite(v)?format(s,v,p):m})}
 
 L.currency={format,localize,R,map,of:currencyOf,pli,upaToEUR,toLocal,eurText,localText,describe,countryIncome,info:(s,p=s.person)=>{const c=L.country(s,p),cur=currencyOf(c.code);return{...cur,pli:pli(c),eurPerUPA:pli(c)/R.USD[0],text:cur.euro?'La monnaie de votre pays est l’euro.':`Monnaie locale : ${cur.name} (${cur.code}). 1 € ≈ ${compact(cur.perEUR)} ${cur.code}.`}}};
