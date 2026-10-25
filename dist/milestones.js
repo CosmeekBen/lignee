@@ -66,7 +66,7 @@ const choices=[
 ];
 
 const resolve=(v,s,p)=>typeof v==='function'?v(s,p):v;
-const build=(m,s,p,milestone)=>({id:m.id,title:m.title,text:resolve(m.text,s,p),choices:resolve(milestone?m.choices:m.options,s,p),category:m.category||'Vie personnelle',required:true,...(milestone?{announce:true,big:m.big,sub:m.sub,at:m.at}:{})});
+const build=(m,s,p,milestone)=>({id:m.id,title:resolve(m.title,s,p),text:resolve(m.text,s,p),choices:resolve(milestone?m.choices:m.options,s,p),category:m.category||'Vie personnelle',required:true,...(milestone?{announce:true,big:m.big,sub:m.sub,at:m.at}:{})});
 
 /* Prépare l'événement de l'année suivante : le moteur le prendra en priorité dans s.queue. */
 function plan(s){const p=s.person;if(!p.alive||s.pending)return;s.queue??=[];const age=p.age+1;

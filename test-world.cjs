@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-for(const n of ['engine','world','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','passions','life-choices','milestones','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
+for(const n of ['engine','world','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','passions','life-choices','milestones','threads','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
 const play=(s,until=999,pick)=>{let g=0;while(s.person.alive&&s.person.age<until&&g++<500){if(s.pending){const e=s.pending;const ok=e.choices.findIndex(c=>!L.canChoose(s,c));L.choose(s,pick?pick(e,ok):(ok<0?0:ok))}else L.year(s)}return s};
 // ── Noms cohérents avec la culture
 const sur=code=>new Set(Array.from({length:40},(_,i)=>L.create('N'+code+i,code).person.surname));
@@ -61,4 +61,11 @@ const sw=L.struggles.find(x=>x.id==='forced-marriage');assert(['accept','refuse'
  m.person.country='US';assert(/\$ \(≈ .* €\)$/.test(L.currency.localize(m,'1 500 UPA')),'États-Unis : dollars avec équivalent');
  L.log(m,'Vous recevez 3 000 UPA',true);assert(!/UPA/.test(m.journal.at(-1).text)&&/\$/.test(m.journal.at(-1).text),'journal écrit dans la monnaie du moment');
  assert.equal(L.currency.localize(m,'rien à convertir'),'rien à convertir')}
+
+// ── Suites des choix : animaux, premier amour, amitiés, causes de décès, variété des débuts
+{let pets=0,named=0,follow=0,lines=0;for(let i=0;i<80;i++){const s=L.create('TH'+i,['FR','SD','IN'][i%3]);play(s);const j=s.journal.map(x=>x.text);if(j.some(t=>/adoptez|refusent d’adopter/.test(t)))pets++;if(s.person.pets?.length)named++;if(j.some(t=>/Le tournoi|remporte le tournoi|s’incline en finale|réconciliez|rétablit|ne se remet pas|meurt à \d+ ans, votre|s’éteint/.test(t)))follow++;if(!j.some(t=>/^Ce qui s’est passé —/.test(t)))lines++}
+ assert(pets>=8,'des animaux croisent la route : '+pets);assert(follow>=40,'les choix ont des suites : '+follow);assert.equal(lines,80,'pas de ligne de journal redondante')}
+{const causes=new Set();let noCause=0,dead=0;for(let i=0;i<120;i++){const s=L.create('DC'+i,['SD','FR','UA','NG'][i%4]);play(s);if(!s.person.alive){dead++;if(!s.person.cause)noCause++;else causes.add(s.person.cause)}}assert(dead>=100&&noCause===0,'chaque décès a une cause : '+noCause+'/'+dead);assert(causes.size>=8,'causes variées : '+causes.size);
+ const kid=L.create('KID8','SD');kid.person.age=8;assert(typeof L.causeOfDeath(kid,kid.person)==='string');const j=L.create('KID9','FR');j.person.age=92;assert.notEqual(L.causeOfDeath(j,j.person),L.causeOfDeath(kid,kid.person)+'x')}
+{const sch=new Set(),bir=new Set(),tal=new Set();for(let i=0;i<120;i++){const s=L.create('VAR'+i,['FR','SD','IN','US','BR'][i%5]);bir.add(s.pending.text.slice(0,40));let g=0;while(s.person.alive&&s.person.age<19&&g++<200){if(s.pending){const e=s.pending;if(e.id==='school')sch.add(e.title);if(e.id==='talent')tal.add(e.title);const ok=e.choices.findIndex(c=>!L.canChoose(s,c));L.choose(s,ok<0?0:ok)}else L.year(s)}}assert(bir.size>=8&&sch.size>=5&&tal.size>=4,'débuts variés : naissances '+bir.size+', écoles '+sch.size+', passions '+tal.size)}
 console.log(JSON.stringify({world:'passed',reachLycee:{SD:rSD,FR:rFR},fatePerLife:+mean.toFixed(1),struggles,passionCareers:L.passionCareers.length,occupations:L.occupations.length}));

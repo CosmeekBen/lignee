@@ -84,6 +84,7 @@ const eventWithStats=eventView;eventView=function(){const e=state.pending;let ht
 /* Rail : états durables et statut d'études */
 const railBeforeStudy=characterRail;characterRail=function(){let html=railBeforeStudy();const p=state.person,conds=p.conditions||[];const lvl=Life.educationLabel?Life.educationLabel(p):'';
   const extra=[];if(p.age>=6)extra.push(`<div class="data-row"><span>Scolarité</span><b>${esc(lvl)}</b></div>`);if(p.study){const pr=Life.programById[p.study.program];extra.push(`<div class="data-row"><span>En formation</span><b>${esc(pr.name)} · ${p.study.year}/${p.study.years}</b></div>`)}
+  const pets=(p.pets||[]).filter(x=>!x.dead);if(pets.length)extra.push(`<div class="cond-strip">${pets.map(x=>`<span class="tag">${Life.pets.SPECIES[x.sp].icon} ${esc(x.name)} · ${x.age} an${x.age>1?'s':''}</span>`).join('')}</div>`);
   if(conds.length)extra.push(`<div class="cond-strip">${conds.map(x=>`<span class="tag ${x.sev>=2?'warning':''}">${esc(x.label)}</span>`).join('')}</div>`);
   const pass=Object.entries(p.passions||{}).filter(([,v])=>v.intensity>0).slice(0,3).map(([id,v])=>`<span class="tag">${Life.passionById[id].icon} ${Math.round(v.level)}</span>`).join('');if(pass)extra.push(`<div class="cond-strip">${pass}</div>`);
   if(p.age>=18)extra.push(`<small class="muted cur-line">${esc(Life.currency.info(state).text)}</small>`);

@@ -24,6 +24,9 @@ npm run build    # HTML autonome dans build/lignees.html
 - **Choix intimes et luttes** (`dist/life-choices.js`) : envie d'une relation, attirance, en parler ou non ; mariage imposé, école arrêtée, reprise de l'affaire familiale, service militaire, salaire non payé, discrimination, corruption, expulsion, héritage disputé… On accepte, on résiste, on négocie, on temporise ou on fuit, et la famille accepte ou non.
 - **Noms cohérents** (`dist/names.js`) : environ 55 ensembles culturels couvrent les 197 pays (parents, amis, partenaires, enfants).
 - **Moins de répétitions** : plafonds par décision et par vie, délais minimaux.
+- **Suites des choix** (`dist/threads.js`) : un animal recueilli (espèce, couleur, nom) grandit, tombe malade, meurt ; un premier amour dure ou s'arrête ; un·e ami·e de la cour, un échange à l'étranger, une équipe de quartier, un·e enseignant·e ou un petit boulot d'été ont des suites quelques années plus tard. Chaque choix écrit une phrase précise dans le journal.
+- **Débuts variés** (`dist/variants.js`) : 24 naissances, 4 premières sorties, 7 rentrées, 5 éveils de passion et 4 adolescences différentes, selon le pays, le foyer et le milieu.
+- **Causes de décès** : chaque mort a une cause plausible (âge, pays, soins, santé).
 - Écran « Ma vie » : le personnage à gauche, les focus en haut au centre, les événements au centre (`dist/layout-ui.js`).
 
 ## Architecture

@@ -171,5 +171,16 @@ L.year=function(s,withEvent=true){const p=s.person;if(p?.alive&&!s.pending){plan
 L.choose=function(s,i){const e=s.pending,x=e?.choices?.[i];const r=base.choose(s,i);if(r){applyFate(s,x,e);if(!s.pending&&s.queue?.length&&s.person.alive)s.pending=s.queue.shift()}return r};
 L.capacityPenalty=p=>(base.capacityPenalty?.(p)||0)+Math.round(penaltyOf(p));
 const prevExtra=L.extraJobReasons;L.extraJobReasons=function(s,j,p){const out=prevExtra?prevExtra(s,j,p):[];const conds=p.conditions||[];if(conds.some(x=>CONDITIONS[x.id]?.mobility)&&['building','factory','agriculture','maritime','industry','sport','military','security','transport','logistics','craft'].includes(j.sector))out.push('Ce métier est incompatible avec votre handicap moteur (un poste adapté pourrait exister dans un autre domaine).');if(conds.some(x=>CONDITIONS[x.id]?.physical&&x.sev>=2)&&j.sector==='sport'&&j.passion)out.push('Votre état de santé ne permet plus la compétition de haut niveau.');return out};
+
+/* Cause d'un décès « naturel » : selon l'âge, le pays, la santé et l'accès aux soins. */
+function causeOfDeath(s,p){const c=L.country(s,p),age=p.age,poor=poorness(c),u=hash(s.seed,p.id,'cause',age),weak=(100-p.health)/100;const pickW=(items)=>{const tot=items.reduce((n,x)=>n+x[1],0);let t=u*tot;for(const[k,w]of items){t-=w;if(t<=0)return k}return items[0][0]};
+  if(p.conditions?.some(x=>x.id==='cancer_chronic'))return'un cancer';
+  if(age<1)return pickW([['une infection néonatale',2+3*poor],['une malformation',1.5],['une détresse respiratoire',1.2+poor],['la mort subite du nourrisson',1]]);
+  if(age<15)return pickW([['une pneumonie',1+3*poor],['une diarrhée et la déshydratation',poor*3],[MALARIA.has(c.code)?'le paludisme':'une fièvre infectieuse',MALARIA.has(c.code)?3:.5+poor],['la malnutrition',poor*2.5],['une rougeole',poor*1.2],['un accident',1.2],['la noyade',.7],['une leucémie',1.2*(1-poor)+.2],['une maladie rare',.6],[CONFLICT.has(c.code)?'les violences d’un conflit':'un accident domestique',CONFLICT.has(c.code)?1.5:.4]]);
+  if(age<40)return pickW([['un accident de la route',1.5],['une maladie infectieuse',.4+2*poor],['une maladie grave',1.2],['un accident',1],[CONFLICT.has(c.code)?'les violences d’un conflit':'une chute',CONFLICT.has(c.code)?2:.4],['une overdose',.35*(1-poor)],[p.sex==='F'&&age>=18?'des complications de grossesse':'une infection',p.sex==='F'?.5+2*poor:.3],['un accident du travail',.5]]);
+  if(age<65)return pickW([['une maladie cardiaque',2],['un cancer',2.4],['un accident vasculaire cérébral',1],['un accident',.7],['une maladie du foie',.6],['les complications d’un diabète',.8+weak],['une infection grave',.4+poor],['une insuffisance rénale',.5]]);
+  if(age<88)return pickW([['une maladie cardiaque',2.6],['un cancer',2.2],['un accident vasculaire cérébral',1.6],['une pneumonie',1+poor],['une insuffisance respiratoire',.9],['la maladie d’Alzheimer',.7],['une insuffisance rénale',.7],['une chute',.5]]);
+  return pickW([['les suites du grand âge',3],['une pneumonie',1],['une insuffisance cardiaque',1.5],['un accident vasculaire cérébral',.9],['la maladie d’Alzheimer',.8]])}
+L.causeOfDeath=causeOfDeath;
 L.fate={hazards,CONDITIONS,care,hq,vehicle,addCondition,penaltyOf,plan};
 })(typeof window!=='undefined'?window:globalThis);
