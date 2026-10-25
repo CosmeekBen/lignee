@@ -1,13 +1,13 @@
 /* Disposition de « Ma vie » : le personnage à gauche, les focus en haut au centre,
    les événements au centre. Ajoute aussi la vue « Repères » (comparaisons en %). */
-const BUILD_LABEL='2.11';
+const BUILD_LABEL='2.12';
 tabs.splice(1,0,['standing','%','Repères']);navUnlock.standing=6;
 const railBar=(label,v,good=true)=>`<div class="rail-stat"><div><span>${label}</span><b>${Math.round(v)}</b></div><div class="bar"><i style="width:${Math.max(0,Math.min(100,v))}%;background:${(good?v:100-v)<30?'var(--red)':'var(--green)'}"></i></div></div>`;
 const pctLabel=r=>r.share?r.world.toLocaleString('fr-FR')+' %':Life.describePercentile(r.world);
 function standRow(r){return`<div class="stand-row"><div class="stand-top"><span>${esc(r.label)}</span><b>${pctLabel(r)}</b></div><div class="pct-bar" title="${esc(r.display)}"><i style="left:${Math.max(1,Math.min(99,r.world))}%"></i></div></div>`}
 function lineageCapital(p){return p.lineage?.applied?p.lineage.capital:Life.lineage.inheritedCapital(state,p).capital}
 function characterRail(){const p=state.person,c=Life.country(state),s=state;
-  const job=p.age<5?'Les premières années':p.age<16?'Enfance & découvertes':p.job;
+  const sit0=Life.situation?Life.situation(s,p):null,job=sit0&&sit0.kind!=='work'?sit0.label:p.job;
   const worth=p.alive?Life.balance(p):p.finalWorth||0;
   const rows=p.age>=6?Life.standingHighlights(Life.standing(s).rows,3):[];
   const cap=lineageCapital(p);
@@ -86,13 +86,19 @@ const srcOf=x=>x.src||(/chance|famille|vos |même chose/i.test(x.label)?'jeu':'e
 function statBars(e){if(!e.stats?.length)return'';return`<div class="event-stats"><div class="eyebrow">${esc(e.statsKicker||'Les chiffres')}</div>${e.stats.map(x=>{const p=x.p!=null?x.p:x.pct/100,sl=SRC_LABEL[srcOf(x)];return`<div class="ev-stat ${x.strong?'strong':''}"><div class="ev-top"><span>${esc(x.label)} <em class="src ${sl[1]}">${sl[0]}</em></span><b>${esc(Life.odds.both(p))}</b></div><div class="bar"><i style="width:${Math.max(1,Math.min(100,p*100))}%"></i></div>${x.note?`<small>${esc(x.note)}</small>`:''}</div>`}).join('')}</div>`}
 const eventWithStats=eventView;eventView=function(){const e=state.pending;let html=eventWithStats();if(e.stats?.length)html=html.replace('<div class="choices">',statBars(e)+'<div class="choices">');if(e.tone)html=html.replace('<article class="card event','<article class="card event tone-'+e.tone);return html};
 /* Rail : états durables et statut d'études */
+
+function parcoursCard(){const s=state,p=s.person;if(p.age<6||!p.alive)return'';const sit=Life.situation(s,p),dip=Life.diplomas(s,p),near=p.age>=16&&sit.kind!=='school'?Life.nearJobs(s,p,2):null;
+  const pr=sit.progress?`<div class="path-prog">${Array.from({length:sit.progress.total},(_,i)=>`<i class="${i<sit.progress.done?'on':i===sit.progress.done?'now':''}"></i>`).join('')}</div>`:'';
+  const chips=dip.map(d=>`<span class="dip ${d.state}" title="${esc(d.note||'')}">${d.state==='done'?'✓':d.state==='now'?'●':'✗'} ${esc(d.label)}${d.note&&d.state!=='done'?` <small>${esc(d.note)}</small>`:''}</span>`).join('');
+  const nearHtml=near&&near.near.length&&sit.kind!=='study'?`<div class="path-near"><small class="muted">${near.open} métier${near.open>1?'s':''} accessible${near.open>1?'s':''} sur ${near.total} (niveau d’entrée)</small>${near.near.map(n=>`<div><b>${esc(n.job.title)}</b><small>${esc(n.reasons[0])}</small></div>`).join('')}</div>`:'';
+  return`<section class="char-card path-card"><div class="rail-head"><h3>Mon parcours</h3><button class="muted" onclick="nav('study')">Études ↗</button></div><div class="path-now k-${sit.kind}"><span class="path-ico">${sit.icon}</span><div><b>${esc(sit.label)}</b><small>${esc(sit.detail)}</small></div></div>${pr}<div class="path-dips">${chips}</div>${nearHtml}</section>`}
 const railBeforeStudy=characterRail;characterRail=function(){let html=railBeforeStudy();const p=state.person,conds=p.conditions||[];const lvl=Life.educationLabel?Life.educationLabel(p):'';
-  const extra=[];if(p.age>=6)extra.push(`<div class="data-row"><span>Scolarité</span><b>${esc(lvl)}</b></div>`);if(p.study){const pr=Life.programById[p.study.program];extra.push(`<div class="data-row"><span>En formation</span><b>${esc(pr.name)} · ${p.study.year}/${p.study.years}</b></div>`)}
+  const extra=[];
   const pets=(p.pets||[]).filter(x=>!x.dead);if(pets.length)extra.push(`<div class="cond-strip">${pets.map(x=>`<span class="tag">${Life.pets.SPECIES[x.sp].icon} ${esc(x.name)} · ${x.age} an${x.age>1?'s':''}</span>`).join('')}</div>`);
   if(conds.length)extra.push(`<div class="cond-strip">${conds.map(x=>`<span class="tag ${x.sev>=2?'warning':''}">${esc(x.label)}</span>`).join('')}</div>`);
   const pass=Object.entries(p.passions||{}).filter(([,v])=>v.intensity>0).slice(0,3).map(([id,v])=>`<span class="tag">${Life.passionById[id].icon} ${Math.round(v.level)}</span>`).join('');if(pass)extra.push(`<div class="cond-strip">${pass}</div>`);
   if(p.age>=18&&!Life.currency.info(state).euro)extra.push(`<small class="muted cur-line">${esc(Life.currency.info(state).text)}</small>`);
-  if(!extra.length)return html;return html.replace('<div class="rail-stats">',`<div class="rail-extra">${extra.join('')}</div><div class="rail-stats">`)};
+  if(extra.length)html=html.replace('<div class="rail-stats">',`<div class="rail-extra">${extra.join('')}</div><div class="rail-stats">`);return html.replace('</section>',`</section>${parcoursCard()}`)};
 /* Études */
 function programCard(x,p){const blocked=!x.eligible;return`<article class="program ${blocked?'blocked':''}"><div class="pr-head"><div><h4>${esc(x.name)}</h4><small>${esc(x.desc||'')}</small></div><div class="pr-chance"><b>${esc(Life.odds.pct(x.admission))}</b><small>d’admission (${esc(Life.odds.chances(x.admission))})</small></div></div>
 <div class="pr-meta"><span>⏱ ${x.years} an${x.years>1?'s':''}</span><span>${x.free?'🆓 gratuit ou rémunéré':'💶 ≈ '+plain(x.cost)+' UPA/an'}</span>${x.fieldNames?`<span>📚 ${esc(x.fieldNames)}</span>`:''}</div>

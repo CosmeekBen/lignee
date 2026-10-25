@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-for(const n of ['engine','world','facts','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','outcomes','variants','achievements'])require('./dist/'+n+'.js');const L=globalThis.Life;
+for(const n of ['engine','world','facts','depth','time','checks','occupations','society','standing','lineage','names','currency','education','fate','mortality','passions','life-choices','milestones','threads','outcomes','variants','achievements','path'])require('./dist/'+n+'.js');const L=globalThis.Life;
 const play=(s,until=999,pick)=>{let g=0;while(s.person.alive&&s.person.age<until&&g++<500){if(s.pending){const e=s.pending;const ok=e.choices.findIndex(c=>!L.canChoose(s,c));L.choose(s,pick?pick(e,ok):(ok<0?0:ok))}else L.year(s)}return s};
 // ── Noms cohérents avec la culture
 const sur=code=>new Set(Array.from({length:40},(_,i)=>L.create('N'+code+i,code).person.surname));
@@ -89,3 +89,12 @@ console.log(JSON.stringify({world:'passed',reachLycee:{SD:rSD,FR:rFR},fatePerLif
 if(!s.person.alive)continue;s.pending={id:'teen-needhands',title:'La famille a besoin de bras',text:'x',choices:[{label:'Aider',fx:{}},{label:'Plaider pour rester à l’école',fx:{}},{label:'Chercher une aide',fx:{}}]};L.choose(s,1);
 if(s.pending?.id==='out-teen-needhands'&&/parents|aide|école/.test(s.pending.text)&&s.journal.at(-1).text.length>10){ok++;L.choose(s,0)}else none++}
 if(!ok||none)throw new Error('outcomes: ok '+ok+' none '+none);console.log('outcomes ok',ok);}
+{const L=globalThis.Life;
+// parcours : situation lisible et règles de compatibilité
+const s=L.create({seed:'path1',country:'FR'});for(let y=0;y<12&&s.person.alive;y++){L.year(s);while(s.pending)L.choose(s,s.pending.choices.length>1&&/^edu-|struggle/.test(s.pending.id)?1:0)}
+const sit=L.situation(s);assert(sit.kind&&sit.label,'situation');assert(Array.isArray(L.diplomas(s)),'diplômes');
+const t=L.create({seed:'path2',country:'FR'});t.person.age=19;t.person.school={level:3,history:[]};t.person.education=1;t.person.study={program:'bts',year:0,years:2,effort:2,started:t.year,failedYears:0,intent:2};
+assert(L.situation(t).kind==='study','en formation');const j=L.occupations.find(x=>x.rank===0);assert(L.jobReasons(t,j).some(r=>/en formation/.test(r)),'pas de poste plein temps pendant les études');
+t.person.study.intent=1;assert(!L.jobReasons(t,j).some(r=>/en formation/.test(r)),'rythme léger : emploi possible');
+const u=L.create({seed:'path3',country:'FR'});u.person.age=13;u.person.school={level:2,history:[],stopped:true,stoppedAge:12};assert(L.situation(u).kind==='outschool','hors de l’école');assert(!L.pathFits(u,u.person,{id:'edu-upper'})&&!L.pathFits(u,u.person,{id:'teen-exam'}),'pas d’événements scolaires hors de l’école');
+console.log('path ok');}
