@@ -1,5 +1,6 @@
 /* Disposition de « Ma vie » : le personnage à gauche, les focus en haut au centre,
    les événements au centre. Ajoute aussi la vue « Repères » (comparaisons en %). */
+const BUILD_LABEL='2.8';
 tabs.splice(1,0,['standing','%','Repères']);navUnlock.standing=6;
 const railBar=(label,v,good=true)=>`<div class="rail-stat"><div><span>${label}</span><b>${Math.round(v)}</b></div><div class="bar"><i style="width:${Math.max(0,Math.min(100,v))}%;background:${(good?v:100-v)<30?'var(--red)':'var(--green)'}"></i></div></div>`;
 const pctLabel=r=>r.share?r.world.toLocaleString('fr-FR')+' %':Life.describePercentile(r.world);
@@ -13,7 +14,7 @@ function characterRail(){const p=state.person,c=Life.country(state),s=state;
   return`<aside class="char-rail"><section class="char-card"><div class="char-id"><div class="avatar pixel">${pixelAvatar(p)}</div><div><h2>${esc(p.name)} ${esc(p.surname)}</h2><small>${p.age} ans · ${state.year}</small></div></div>
 <div class="char-meta"><span>⌖ ${esc(c.name)}</span><span>◌ ${esc(job)}</span><span>⑂ Génération ${state.generation}</span></div>
 <div class="rail-stats">${railBar('Santé',p.health)}${railBar('Épanouissement',p.happiness)}${railBar('Énergie',p.energy)}${railBar('Stress',p.stress,false)}</div>
-${p.age>=18?`<div class="rail-money"><span>Patrimoine net</span><b>${money(worth)}</b></div>`:''}
+${p.age>=10?`<div class="rail-money"><span>${p.age>=18?'Patrimoine net':'Argent à vous'}</span><b>${money(worth)}</b></div>`:''}
 ${p.statuses.length?`<div class="status-strip">${p.statuses.map(x=>`<span class="tag warning">${esc(x.label)} · ${x.years} an${x.years>1?'s':''}</span>`).join('')}</div>`:''}</section>
 ${rows.length?`<section class="char-card"><div class="rail-head"><h3>Parmi les autres</h3><button class="muted" onclick="nav('standing')">Tout ↗</button></div><small class="muted">Face à l’ensemble des humains</small>${rows.map(standRow).join('')}</section>`:''}
 ${p.age>=6?`<section class="char-card"><div class="rail-head"><h3>Capital de lignée</h3><b class="gold">${cap}</b></div><div class="bar"><i style="width:${cap}%;background:var(--gold)"></i></div><p class="hint">${p.lineage?.applied?'Réseau, nom et études transmis par vos aïeux.':'Se fixe à 18 ans, d’après ce que vos parents ont accompli.'}</p></section>`:''}
