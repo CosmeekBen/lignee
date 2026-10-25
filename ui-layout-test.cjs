@@ -11,4 +11,10 @@ for(const age of [0,3,8,17,34,70]){vm.runInContext(`state=Life.create('LAYOUT-${
   if(age>=6)assert(html.includes('focus-strip'),'focus '+age);if(age>=18)assert(html.includes('Capital de lignée'));}
 vm.runInContext("nav('standing')",context);assert(app().includes('stand-table')&&!app().includes('NaN')&&app().includes('Votre lignée'));
 vm.runInContext("state.person.alive=false;page='life';render()",context);assert(!app().includes('NaN'));
+
+for(const age of [12,20,40]){vm.runInContext(`state=Life.create('NEWUI-${age}','SD');state.birthRevealed=true;{let g=0;while(state.person.age<${age}&&g++<300){if(state.pending)Life.choose(state,Math.max(0,state.pending.choices.findIndex(c=>!Life.canChoose(state,c))));else Life.year(state)}}page='study';render()`,context);assert(app().includes('program')||age<18||app().includes('school-table'),'études '+age);assert(!app().includes('NaN')&&!app().includes('undefined'),'études sans NaN '+age);
+  vm.runInContext("page='passions';render()",context);assert(app().includes('passion-catalog')&&!app().includes('NaN'),'passions '+age);}
+vm.runInContext("state=Life.create('EVSTAT','FR');state.birthRevealed=true;{let g=0;while(!(state.pending&&state.pending.id==='edu-lower')&&g++<200){if(state.pending)Life.choose(state,0);else Life.year(state)}}page='life';render()",context);assert(app().includes('event-stats')&&app().includes('Vos chances'),'statistiques dans la décision de scolarité');
+vm.runInContext("state=Life.create('EVFATE','FR');state.birthRevealed=true;state.person.age=45;state.pending=Life.fate.hazards.find(h=>h.id==='cardiac').build({s:state,p:state.person,c:Life.country(state),r:()=>.9,care:.8});page='life';render()",context);assert(app().includes('Un infarctus')&&app().includes('event-stats'),'imprévu avec statistiques');
+vm.runInContext("state.person.alive=false;state.person.cause='infarctus';page='life';render()",context);assert(!app().includes('NaN'),'fin de vie avec cause');
 console.log(JSON.stringify({layoutUI:'passed',scripts:scripts.length}));

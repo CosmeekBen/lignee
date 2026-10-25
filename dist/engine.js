@@ -7,7 +7,7 @@ const countries=[
 const names=['Camille','Alex','Noa','Sasha','Charlie','Lou','Sam','Robin','Eden','Andrea','Mika','Ari','Alix','Nour','Amal','Rio','Lina','Maya','Luca','Elia'];
 const familyNames={FR:['Martin','Moreau','Laurent'],IN:['Sharma','Patel','Kumar'],CN:['Wang','Li','Zhang'],NG:['Okafor','Bello','Adeyemi'],JP:['Sato','Tanaka','Suzuki'],BR:['Silva','Santos','Costa'],DE:['Weber','Fischer','Wagner'],XX:['Rivera','Ali','Kim']};
 const clamp=(v,a=0,b=100)=>Math.min(b,Math.max(a,v));
-function hash(s){let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function hash(s){let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}h^=h>>>16;h=Math.imul(h,2246822507);h^=h>>>13;h=Math.imul(h,3266489909);h^=h>>>16;return h>>>0}
 function rand(s){let t=s.rng+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}
 function pick(s,a){return a[Math.floor(rand(s)*a.length)]}
 function log(s,text,important=false){s.journal.push({age:s.person.age,year:s.year,text,important,person:s.person.id});if(s.journal.length>1600)s.journal.shift()}
